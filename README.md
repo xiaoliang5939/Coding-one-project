@@ -46,9 +46,14 @@ But my dream Christmas should have snow, but snow is not something we can see wh
 
 ·Sound and Signal processing
 
+## Detail
+
 In the process of experimenting, I tried to use three.js to make snow animation, but the 2D effect was too simple when using pictures to add, and adding multiple snowflake pictures could not produce the falling effect. This is the effect of trying：https://mimicproject.com/code/2baac440-3185-5fa9-3ccf-f5ca5df69ddd
 
 In the end, I chose to use the 3D effect to achieve the snowflake effect, which is more immersive. This is a trial effect of trying：https://mimicproject.com/code/fe4c9d06-1e89-a439-b5f4-55a89c2b5e1f
+https://github.com/xiaoliang5939/Coding-one-project/tree/main/try1-MIMIC-2
+
+After making the animation effect, I thought about adding Christmas-style background music to this animation. After choosing the music, I found that the music has a clear rhythm. At this time, I think the rhythm of the music can be used to control the falling of snowflakes. Speed, so that music and pictures have a better fusion effect.
 
 
 
