@@ -3,12 +3,15 @@
 # Merry Christmas
 
 Author: Xiao Liang
+
 Student ID: 22010608
+
 Creation time:04/12/22
 
-Project link：https://github.com/xiaoliang5939/Coding-one-project
 
-Final code and file link：https://github.com/xiaoliang5939/Coding-one-project/tree/main/*Final%20Merry%20Christmas-MIMIC-4
+·Project link：https://github.com/xiaoliang5939/Coding-one-project
+
+·Final code and file link：https://github.com/xiaoliang5939/Coding-one-project/tree/main/*Final%20Merry%20Christmas-MIMIC-4
 
 
 ## Intorduction
@@ -39,7 +42,9 @@ But my dream Christmas should have snow, but snow is not something we can see wh
 
 ## Recommended modules
 
-Sound and Signal processing
+·Sound and Signal processing
+·3D graphics
 
-3D graphics
+
+
 
