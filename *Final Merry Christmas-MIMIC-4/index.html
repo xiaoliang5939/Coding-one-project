@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script>window.onerror = function(error, url, line) {parent.postMessage(["console", "❌ -- [ERROR] -- ❌ -- ⚠️ " + error], "*")};var cl = console.log;console.log = function () {var msg = [...arguments].join();parent.postMessage(["console", msg], "*");  }  </script><script>window.onerror = function(error, url, line) {parent.postMessage(["console", "❌ -- [ERROR] -- ❌ -- ⚠️ " + error], "*")};var cl = console.log;console.log = function () {var msg = [...arguments].join();parent.postMessage(["console", msg], "*");  } 
+</script><script src="https://mimicproject.com/libs/maximilian.js">
+</script>
+        <script crossorigin src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js">
+</script>
+        <link
+            href="https://fonts.googleapis.com/css?family=Staatliches"
+            rel="stylesheet"
+        />
+        <script crossorigin src="https://rawgit.com/nexus-js/ui/master/dist/NexusUI.js">
+</script>
+        <style type = "text/css" >
+html {
+    height: 100%;
+    width: 100%;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+
+#playButtonContainer {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    z-index: 1;
+}
+
+#playButton {
+    background: #a90100;
+    box-shadow: 0px 0px 5px #11111136;
+    border: 1px solid #11111136;
+    padding: 10px 25px;
+    font-size: 15px;
+    color: #008B00;
+    font-weight: 900;
+    letter-spacing: 3px;
+}
+
+.playButtonFullscreen {
+	margin-top: 5px;
+}
+</style>
+    </head>
+    <body>
+        <div id="playButtonContainer">
+          <div><button id="playButton">***PLAY*** <div class="playButtonFullscreen">*Merry Christmas*</div></button></div>
+        </div>
+
+        <!-- The Canvas tag sets up a screen in the browser that we can draw to. -->
+        <canvas></canvas>
+
+        <script language="javascript" type="text/javascript">
+const rollingAudioOutAverageCount = 100;
+
+const beatColors = {
+    0: "#da8a01",
+    1: "#d69d3b",
+    2: "#d4a85b",
+    3: "#cfcfcf",
+};
+
+class BeatShape {
+    constructor({ xCenter, yCenter, radius, index, frameStart }) {
+        this.xCenter = xCenter;
+        this.yCenter = yCenter;
+        this.radius = radius;
+        this.index = index;
+        this.frameStart = frameStart;
+
+        this.moveForward = true;
+    }
+
+    draw({ frame }) {
+        const nPoints = 1000;
+        const nFrames = 100;
+        const stepStart = 0;
+        const stepEnd = 0.5;
+
+        /
+        let currFrame = frame - this.frameStart;
+        let timeInCycle = currFrame / nFrames;
+        if (!this.moveForward) timeInCycle = 1 - timeInCycle;
+      
+        const step = stepStart + timeInCycle * (stepEnd - stepStart);
+
+        context.strokeStyle = beatColors[this.index];
+        context.lineWidth = (4 - this.index) * 0.25;
+
+        context.beginPath();
+
+        for (let point = 0; point < nPoints; point++) {
+            const theta = TWO_PI * (point / nPoints);
+
+            let multiplierA = map(step, 0, 1, 0, 4.5);
+            let multiplierB = map(step, 0, 1, 3, 4.5);
+
+            const x =
+                this.xCenter +
+                Math.cos(theta * multiplierA) *
+                    Math.sin(theta * multiplierB) *
+                    this.radius *
+                    (this.index * 1.1 + 1);
+            const y =
+                this.yCenter +
+                Math.sin(theta * multiplierA) *
+                    Math.sin(theta * multiplierB) *
+                    this.radius *
+                    (this.index * 1.1 + 1);
+
+            context.lineTo(x, y);
+        }
+
+        context.stroke();
+        context.closePath();
+
+        
+    }
+}
+
+</script>
+        <script language="javascript" type="text/javascript">
+class ViolinShape {
+    constructor({
+        xCenter,
+        yCenter,
+        radius,
+        startAngle = Math.PI,
+        startFrame = 0,
+        xStretch = 1.5,
+        playSpeed = 20, 
+    }) {
+        this.xCenter = xCenter;
+        this.yCenter = yCenter;
+        this.radius = radius;
+        this.startAngle = startAngle;
+        this.startFrame = startFrame;
+        this.xStretch = xStretch;
+        this.playSpeed = playSpeed;
+    }
+
+    draw({ frame } = {}) {
+        
+        canvas.addEventListener("mousemove", getMouse, false);
+
+       
+        function getMouse(mousePosition) {
+            mouseX = mousePosition.layerX;
+            mouseY = mousePosition.layerY;
+        }
+
+        function map(number, inMin, inMax, outMin, outMax) {
+            return (
+                ((number - inMin) * (outMax - outMin)) / (inMax - inMin) +
+                outMin
+            );
+        }
+
+        const totalFrames = framesPerSecond * this.playSpeed;
+        var segments = 1000;
+        const maxWidthFactor = 0.45;
+        const currFrame = frame - this.startFrame;
+
+        // context.beginPath();
+        context.strokeStyle = "#da8a01";
+        context.beginPath();
+
+        const segmentsToDraw = map(currFrame, 0, totalFrames, 0, segments);
+
+        for (var i = 0; i < segmentsToDraw; i++) {
+            const theta = TWO_PI * (i / segments);
+
+            const multY = map(currFrame, 0, totalFrames, 502, 510);
+            const widthFactor = Math.min(
+                map(currFrame, 0, 1000, 0.4, 0.5),
+                maxWidthFactor
+            );
+
+            var x =
+                this.xCenter +
+                Math.cos(theta + this.startAngle) *
+                    this.radius *
+                    this.xStretch *
+                    (widthFactor * Math.cos(500 * theta + Math.PI) +
+                        Math.PI / 2);
+
+            var y =
+                this.yCenter +
+                Math.sin(theta + this.startAngle) *
+                    this.radius *
+                    (widthFactor * Math.sin(multY * theta + Math.PI) +
+                        Math.PI / 2);
+
+            context.lineTo(x, y);
+        }
+
+        context.stroke();
+
+        
+    }
+}
+
+
+
+</script>
+        <script language="javascript" type="text/javascript">
+class MirroredViolinShape {
+    constructor({ xCenter, yCenter, startRadius = 20, startFrame }) {
+        this.xCenter = xCenter;
+        this.yCenter = yCenter;
+        this.startRadius = startRadius;
+        this.startFrame = startFrame;
+    }
+
+    draw({ frame }) {
+        const currFrame = frame - this.startFrame;
+        const totalFrames = framesPerSecond * 15;
+        const segments = 1000;
+        const minRadius = 100;
+        const maxRadius = 350;
+
+        context.fillStyle = "#da8a01";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+
+        context.strokeStyle = "#a90100";
+
+        if (currFrame >= totalFrames) return;
+
+        context.beginPath();
+
+         console.log("mouseX", mouseX, "mouseY", mouseY);
+parent.postMessage(["console",JSON.stringify("mouseX"),JSON.stringify(mouseX),JSON.stringify("mouseY"),JSON.stringify(mouseY)], "*");
+        const shift = 0.75; //map(mouseX, 0, canvas.width, -1, 1);
+
+        const radius = Math.min(
+            map(currFrame, 0, totalFrames, minRadius, maxRadius),
+            maxRadius
+        );
+
+        for (var i = 0; i < segments; i++) {
+            const multY = map(currFrame, 0, totalFrames, 502, 505.5);
+            const theta = TWO_PI * (i / segments);
+            var x =
+                this.xCenter +
+                Math.cos(theta + Math.PI) *
+                    radius *
+                    (shift * Math.cos(500 * theta + Math.PI) + Math.PI / 2);
+            var y =
+                this.yCenter +
+                Math.sin(theta + Math.PI / 2) *
+                    radius *
+                    (Math.sin(multY * theta + Math.PI) + Math.PI / 2);
+
+            // if (i === 0) console.log("radius", radius, "shift", shift);
+
+            context.lineTo(x, y);
+        }
+
+        context.stroke(); //draw the outline
+        context.closePath();
+    }
+}
+
+</script>
+        <script language="javascript" type="text/javascript">
+const VIOLIN_PAIR_COUNT = 1;
+
+class MultiViolinShape {
+    constructor({ xCenter, yCenter, startFrame, initialGap = 100 }) {
+        this.xCenter = xCenter;
+        this.yCenter = yCenter;
+        this.initialGap = initialGap;
+        this.startFrame = startFrame;
+
+        const playSpeed = 18; // lower is faster, default is 20
+
+        this.violinShapes = [];
+
+        for (let i = 0; i < VIOLIN_PAIR_COUNT; i++) {
+            const violinShapeA = new ViolinShape({
+                xCenter: this.xCenter - initialGap * (i + 1),
+                yCenter: this.yCenter,
+                radius: 175,
+                xStretch: 1,
+                startAngle: Math.PI,
+                startFrame: this.startFrame,
+                playSpeed: playSpeed,
+            });
+            const violinShapeB = new ViolinShape({
+                xCenter: this.xCenter + initialGap * (i + 1),
+                yCenter: this.yCenter,
+                radius: 175,
+                xStretch: 1,
+                startAngle: 0,
+                startFrame: this.startFrame,
+                playSpeed: playSpeed,
+            });
+
+            this.violinShapes.push(violinShapeA);
+            this.violinShapes.push(violinShapeB);
+        }
+    }
+
+    draw({ frame }) {
+        // context.fillStyle = "#da8a01";
+        // context.fillRect(0, 0, canvas.width, canvas.height);
+
+        // context.strokeStyle = "#a90100";
+
+        this.violinShapes.forEach((violinShape) => {
+            violinShape.draw({ frame });
+        });
+    }
+}
+
+</script>
+        <script language="javascript" type="text/javascript">
+const framesPerSecond = 60;
+
+//create a maximilian object
+var maxi = maximilian();
+var audio = new Audio("IMG_4362.mp3");
+
+let shouldAnimate = false;
+
+//create an audio engine
+var maxiEngine = new maxi.maxiAudio();
+
+// This is where we are going to store the mouse information
+var mouseX = 50;
+var mouseY = 10;
+// We really need this
+const TWO_PI = Math.PI * 2;
+
+let frame = 0;
+let beatShapes = [];
+let violinShapes = [];
+
+let hideBeatShapes = false;
+let backgroundColor = "#a90100";
+
+// This gets a reference to the canvas in the browser
+const playButtonContainer = document.getElementById("playButtonContainer");
+const playButton = document.getElementById("playButton");
+var canvas = document.querySelector("canvas");
+
+// This sets the width and height to the document window
+canvas.width = 1080;
+canvas.height = (1 / 1.66) * canvas.width;
+// Be aware that when you resize the window, you will need to call (do) this again
+
+// This creates a 2d drawing 'context' in your canvas
+// All your drawing will be done in this canvas
+var context = canvas.getContext("2d");
+
+function map(number, inMin, inMax, outMin, outMax) {
+    return ((number - inMin) * (outMax - outMin)) / (inMax - inMin) + outMin;
+}
+
+var myClock = new maxi.maxiClock();
+
+myClock.setTempo(129);
+myClock.setTicksPerBeat(1);
+
+const theme = new maxi.maxiSample();
+
+var scratch = 0;
+var counter = 0;
+
+//when the play button is pressed...
+let playAudio = async () => {
+    // remove play button
+    playButtonContainer.remove();
+
+    //start the audio engine
+    maxiEngine.init();
+
+    audio.currentTime = 0;
+    audio.play();
+
+    const measureSize = 3;
+
+    maxiEngine.play = function () {
+        myClock.ticker();
+
+        if (myClock.tick) {
+            // introduction beat shapes
+            if (
+                counter % (measureSize * 2) === 0 &&
+                counter < measureSize * 8
+            ) {
+                const beatShape = new BeatShape({
+                    xCenter: canvas.width / 2,
+                    yCenter: canvas.height / 2,
+                    radius: 100,
+                    index: beatShapes.length,
+                    frameStart: frame,
+                    startFrame: 0,
+                });
+
+                beatShapes.push(beatShape);
+            }
+
+            // first violin shape
+            if (counter === measureSize * 8) {
+                hideBeatShapes = true;
+
+                const violinShape = new ViolinShape({
+                    xCenter: -50,
+                    yCenter: (3 / 4) * canvas.height,
+                    radius: 200,
+                    startAngle: (3 / 4) * TWO_PI,
+                    startFrame: frame,
+                });
+
+                violinShapes.push(violinShape);
+            }
+
+            // second violin shape
+            if (counter === measureSize * 12) {
+                const violinShape = new ViolinShape({
+                    xCenter: canvas.width + 50,
+                    yCenter: (1 / 4) * canvas.height,
+                    radius: 200,
+                    startAngle: Math.PI / 2,
+                    startFrame: frame,
+                });
+
+                violinShapes.push(violinShape);
+            }
+
+            // clear both violin shapes
+            if (counter === measureSize * 24) {
+                violinShapes = [];
+            }
+
+            // bring in mirrored violin
+            if (counter === measureSize * 25 + 2) {
+                violinShapes = [];
+
+                const mirroredViolinShape = new MirroredViolinShape({
+                    xCenter: (1 / 4) * canvas.width,
+                    yCenter: (3 / 4) * canvas.height,
+                    startFrame: frame,
+                });
+
+                violinShapes.push(mirroredViolinShape);
+            }
+
+            // clear mirrored violin, bring in double cirlces
+            if (counter === measureSize * 34) {
+                violinShapes = [];
+
+                const multiViolinShape = new MultiViolinShape({
+                    xCenter: canvas.width / 2,
+                    yCenter: canvas.height / 2,
+                    startFrame: frame,
+                });
+
+                violinShapes.push(multiViolinShape);
+            }
+
+            if (counter === measureSize * 49) {
+                endAnimation();
+            }
+
+            console.log(counter);
+
+            counter++;
+        }
+
+        return 0;
+    };
+};
+
+// This script listens to the play button
+playButton.addEventListener("click", () => {
+    playAudio();
+
+    shouldAnimate = true;
+    animate();
+});
+
+function endAnimation() {
+    shouldAnimate = false;
+
+    const fadeMusicInterval = setInterval(() => {
+        if (audio.volume <= 0) {
+            clearInterval(fadeMusicInterval);
+            return;
+        }
+
+        audio.volume -= 0.005;
+    }, 20);
+}
+
+// This function translates the canvas so that we're looking at it from a different position, meaning that 0,0 is somewhere else
+function draw() {
+    //clear the screen
+    if (!shouldAnimate) {
+        context.fillStyle = "#000000";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        return;
+    }
+
+    context.fillStyle = "#a90100";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+
+    if (!hideBeatShapes) {
+        for (let i = beatShapes.length - 1; i >= 0; i--) {
+            const beatShape = beatShapes[i];
+            beatShape.draw({ frame });
+        }
+    }
+
+    violinShapes.forEach((violinShape) => {
+        violinShape.draw({ frame });
+    });
+
+    frame++;
+}
+
+//request the first animation frame
+function animate() {
+    setTimeout(function () {
+        requestAnimationFrame(animate);
+
+        draw();
+
+        // animating/drawing code goes here
+    }, 1000 / framesPerSecond);
+}
+// animate();
+//the end.
+
+</script>
+       <meta charset="utf-8">
+   <style>
+
+canvas {
+position: absolute;
+top:0;
+left:0;
+}
+
+</style>
+<body>
+
+ <canvas></canvas>
+    
+  
+<script>
+  var canvas = document.querySelector("canvas");
+  var width = window.innerWidth;
+  var height = window.innerHeight;
+  var context = canvas.getContext("2d");
+  canvas.setAttribute("width",width); 
+  canvas.setAttribute("height", height); 
+  canvas.addEventListener('mousemove',getMouse,false);
+  var mouseX=0;
+  var mouseY=0;
+
+  //Fielf of View
+  var fov = 900;
+  var point = [];
+  var points = [];
+  var point3d = [];
+
+  var angleX = 0;
+  var angleY = 0;
+  var HALF_WIDTH = width / 1;
+  var HALF_HEIGHT = height / 1;
+  
+  var x3d = 1;
+  var y3d = 1;
+  var z3d = 1;
+  
+
+  var dim = 30; //Number of rings 一个方向上的细分
+
+  var size = 320;
+ 
+  var spacing = (Math.PI * 6) / dim;
+
+  var numPoints = dim * 10;
+  
+  
+ 
+  for (var i = 0; i < dim; i++) {
+    
+    
+    var z = size * Math.cos(spacing / 2 * i); // 深度（往屏幕里走）
+   
+    var s = size * Math.sin(spacing / 1 * i); // 大小
+    
+    
+   
+    for (var j = 0; j < dim; j++) {
+      
+      
+      var point = [Math.cos(spacing * j) * s, Math.sin(spacing * j) * s, z];
+      points.push(point);
+      
+    }
+  }
+  
+  
+  
+  
+  
+  console.log(points.length);
+parent.postMessage(["console",JSON.stringify(points.length)], "*");
+
+ 
+  
+  var pot = [];
+  var pots = [];
+  var potsd = [];
+  var xdd = 1;
+  var ydd = 1;
+  var zdd = 0;
+  var div = 20;
+  var space = (Math.PI * 2) / div;
+  var direction = [];
+  var big = 20;
+
+ 
+  for (var i = 0; i < div; i++) {
+   var z = big * Math.cos(space / 1 * i);
+    var s = big * Math.sin(space / 1 * i);
+    for (var j = 0; j < div; j++) {
+      var pot = [Math.cos(spacing * j) * s, Math.sin(spacing * j) * s, z];
+      pots.push(pot);
+    } 
+  }      
+  
+  
+  function draw() {
+    //background
+    context.fillStyle = "0000000";
+    context.fillRect(0, 0, width ,height);
+    
+    angleX = ((mouseX / width) - 0.5) / 10;
+    angleY = ((mouseY / height) - 0.5) / 10;
+   
+    
+    
+    for (var i = 0; i < numPoints; i++) {
+      
+      point3d = points[i];
+      
+      z3d = point3d[2];
+      
+      
+      if (z3d < -fov) z3d += 0;
+     
+      point3d[2] = z3d;
+      
+      
+      
+      rotateX(point3d, angleX);
+      rotateY(point3d, angleY);
+      
+      
+      
+      x3d = point3d[0] + 150;
+      y3d = point3d[1] + 350;
+      z3d = point3d[2];
+      
+      
+      point3d = [x3d, y3d, z3d];
+      
+     
+      
+      x3d = point3d[0];
+      y3d = point3d[1];
+      z3d = point3d[2]; // 
+      
+      var scale = (fov / (fov + z3d));
+      
+      
+      var x2d = (x3d * scale) + HALF_WIDTH / 2;
+     
+      var y2d = (y3d * scale) + HALF_HEIGHT;
+      
+      //____________________________________
+      for (var j = 0; j < div * div; j++) {
+        potsd = pots[j];
+        zdd = pots[2];
+        
+        
+        xdd = potsd[0] + 150 + point3d[0];
+        ydd = potsd[1] + 150 + point3d[1];
+        zdd = potsd[2] + point3d[2];
+        
+        potsd = [xdd, ydd, zdd];
+        
+        xdd = potsd [0];
+        ydd = potsd [1];
+        zdd = potsd [2];
+        
+        var scaling = (fov / (fov + zdd + z3d));
+        
+        var xd = (xdd * scale) + HALF_WIDTH / 5;
+        var yd = (ydd * scale) - HALF_HEIGHT * 2 / 3;
+        
+        context.lineWidth = scaling;
+        context.strokeStyle = "rgb(" + (i%255) + "," + (i%255) + "," + (i%255) + ")";
+        context.beginPath();
+        context.moveTo(xd, yd);
+        context.lineTo(xd + scale, yd);
+        context.stroke();
+    }
+      
+   
+      
+    }
+    
+    
+    
+    requestAnimationFrame(draw);
+  }
+  requestAnimationFrame(draw);
+   
+    
+    
+  function rotateX(point3d, angleX) {
+    
+    var x = point3d[0];
+    var	z = point3d[2]; 
+	
+    var	cosRY = Math.cos(angleX);
+    var	sinRY = Math.sin(angleX);
+        
+    var	tempz = z; 
+    var	tempx = x;
+
+    x = (tempx*cosRY)+(tempz*sinRY);
+    z = (tempx*-sinRY)+(tempz*cosRY);
+
+    point3d[0] = x;
+    point3d[2] = z;
+    
+  }
+  
+
+  function rotateY(point3d,angleY) {
+  
+    var y = point3d[1];
+    var	z = point3d[2]; 
+	
+    var cosRX = Math.cos(angleY);
+    var sinRX = Math.sin(angleY);
+        
+    var	tempz = z; 
+    var	tempy = y;
+
+    y = (tempy*cosRX)+(tempz*sinRX);
+    z = (tempy*-sinRX)+(tempz*cosRX);
+
+    point3d[1] = y;
+    point3d[2] = z;
+  
+  }
+  
+  
+
+  
+  function getMouse (mousePosition) {
+  
+    if (mousePosition.layerX || mousePosition.layerX === 0) { 
+      mouseX = mousePosition.layerX;
+      mouseY = mousePosition.layerY;
+    } else if (mousePosition.offsetX || mousePosition.offsetX === 0) { 
+      mouseX = mousePosition.offsetX;
+      mouseY = mousePosition.offsetY;
+    }
+  }
+  
+</script>
+</body>
+</html>
+
