@@ -42,8 +42,13 @@ But my dream Christmas should have snow, but snow is not something we can see wh
 
 ## Recommended modules
 
-·Sound and Signal processing
 ·3D graphics
+
+·Sound and Signal processing
+
+In the process of experimenting, I tried to use three.js to make snow animation, but the 2D effect was too simple when using pictures to add, and adding multiple snowflake pictures could not produce the falling effect. This is the effect of trying：https://mimicproject.com/code/2baac440-3185-5fa9-3ccf-f5ca5df69ddd
+
+In the end, I chose to use the 3D effect to achieve the snowflake effect, which is more immersive. This is a trial effect of trying：https://mimicproject.com/code/fe4c9d06-1e89-a439-b5f4-55a89c2b5e1f
 
 
 
